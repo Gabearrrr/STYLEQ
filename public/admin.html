@@ -1,0 +1,705 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin - Salon Booking</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+            backdrop-filter: blur(10px);
+        }
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+            padding-bottom: 20px;
+            border-bottom: 2px solid #f0f0f0;
+        }
+        h1 {
+            color: #e94560;
+        }
+        .back-btn {
+            padding: 10px 20px;
+            background: linear-gradient(135deg, #e94560 0%, #c73659 100%);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            text-decoration: none;
+            font-weight: 600;
+            box-shadow: 0 4px 15px rgba(233, 69, 96, 0.3);
+        }
+        .tabs {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 30px;
+            flex-wrap: wrap;
+        }
+        .tab {
+            padding: 12px 24px;
+            background: #f0f0f0;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s;
+        }
+        .tab.active {
+            background: #e94560;
+            color: white;
+        }
+        .tab-content {
+            display: none;
+        }
+        .tab-content.active {
+            display: block;
+        }
+        .form-group {
+            margin-bottom: 15px;
+        }
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: 600;
+            color: #333;
+        }
+        select, input {
+            width: 100%;
+            padding: 10px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 14px;
+        }
+        select:focus, input:focus {
+            outline: none;
+            border-color: #e94560;
+        }
+        .btn {
+            padding: 10px 20px;
+            background: linear-gradient(135deg, #e94560 0%, #c73659 100%);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s;
+            box-shadow: 0 4px 15px rgba(233, 69, 96, 0.3);
+        }
+        .btn:hover {
+            background: linear-gradient(135deg, #c73659 0%, #a52b4a 100%);
+            transform: translateY(-2px);
+        }
+        .btn-small {
+            padding: 5px 10px;
+            font-size: 12px;
+        }
+        .btn-edit {
+            background: linear-gradient(135deg, #667eea 0%, #5568d3 100%);
+        }
+        .btn-delete {
+            background: #dc3545;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+        th, td {
+            padding: 12px;
+            text-align: left;
+            border-bottom: 1px solid #e0e0e0;
+        }
+        th {
+            background: #f8f9fa;
+            font-weight: 600;
+            color: #333;
+        }
+        tr:hover {
+            background: #f8f9fa;
+        }
+        .add-form {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 12px;
+            margin-bottom: 20px;
+        }
+        .form-row {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 15px;
+        }
+        .form-row .form-group {
+            flex: 1;
+        }
+        .status-badge {
+            padding: 4px 8px;
+            border-radius: 12px;
+            font-size: 12px;
+            font-weight: 600;
+        }
+        .status-available {
+            background: #d4edda;
+            color: #155724;
+        }
+        .status-busy {
+            background: #f8d7da;
+            color: #721c24;
+        }
+        .status-off {
+            background: #fff3cd;
+            color: #856404;
+        }
+        .status-waiting {
+            background: #fff3cd;
+            color: #856404;
+        }
+        .status-in_progress {
+            background: #f8d7da;
+            color: #721c24;
+        }
+        .status-completed {
+            background: #d4edda;
+            color: #155724;
+        }
+        .status-cancelled {
+            background: #e2e3e5;
+            color: #383d41;
+        }
+        .status-scheduled {
+            background: #cce5ff;
+            color: #004085;
+        }
+        .message {
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            font-weight: 600;
+        }
+        .success {
+            background: #d4edda;
+            color: #155724;
+        }
+        .error {
+            background: #f8d7da;
+            color: #721c24;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>Admin Dashboard</h1>
+            <a href="/" class="back-btn">Back to Home</a>
+        </div>
+        
+        <div class="tabs">
+            <button class="tab active" onclick="showTab('services')">Services</button>
+            <button class="tab" onclick="showTab('staff')">Staff</button>
+            <button class="tab" onclick="showTab('customers')">Customers</button>
+            <button class="tab" onclick="showTab('reservations')">Reservations</button>
+            <button class="tab" onclick="showTab('queue')">Queue</button>
+        </div>
+
+        <div id="message"></div>
+
+        <!-- Services Tab -->
+        <div id="services" class="tab-content active">
+            <h2>Manage Services</h2>
+            <div class="add-form">
+                <h3>Add New Service</h3>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Service Name</label>
+                        <input type="text" id="serviceName" placeholder="e.g., Haircut">
+                    </div>
+                    <div class="form-group">
+                        <label>Price (₱)</label>
+                        <input type="number" id="servicePrice" placeholder="150">
+                    </div>
+                    <div class="form-group">
+                        <label>Duration (minutes)</label>
+                        <input type="number" id="serviceDuration" placeholder="30">
+                    </div>
+                </div>
+                <button class="btn" onclick="addService()">Add Service</button>
+            </div>
+            <table>
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Service Name</th>
+                        <th>Price</th>
+                        <th>Duration</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody id="servicesTable"></tbody>
+            </table>
+        </div>
+
+        <!-- Staff Tab -->
+        <div id="staff" class="tab-content">
+            <h2>Manage Staff</h2>
+            <div class="add-form">
+                <h3>Add New Staff</h3>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Name</label>
+                        <input type="text" id="staffName" placeholder="e.g., John Doe">
+                    </div>
+                    <div class="form-group">
+                        <label>Role</label>
+                        <select id="staffRole">
+                            <option value="Barber">Barber</option>
+                            <option value="Stylist">Stylist</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Status</label>
+                        <select id="staffStatus">
+                            <option value="available">Available</option>
+                            <option value="busy">Busy</option>
+                            <option value="off">Off</option>
+                        </select>
+                    </div>
+                </div>
+                <button class="btn" onclick="addStaff()">Add Staff</button>
+            </div>
+            <table>
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Name</th>
+                        <th>Role</th>
+                        <th>Status</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody id="staffTable"></tbody>
+            </table>
+        </div>
+
+        <!-- Customers Tab -->
+        <div id="customers" class="tab-content">
+            <h2>Manage Customers</h2>
+            <table>
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Name</th>
+                        <th>Contact</th>
+                        <th>Type</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody id="customersTable"></tbody>
+            </table>
+        </div>
+
+        <!-- Reservations Tab -->
+        <div id="reservations" class="tab-content">
+            <h2>Manage Reservations</h2>
+            <table>
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Customer</th>
+                        <th>Service</th>
+                        <th>Staff</th>
+                        <th>Date</th>
+                        <th>Time</th>
+                        <th>Status</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody id="reservationsTable"></tbody>
+            </table>
+        </div>
+
+        <!-- Queue Tab -->
+        <div id="queue" class="tab-content">
+            <h2>Manage Queue</h2>
+            <table>
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Customer</th>
+                        <th>Service</th>
+                        <th>Staff</th>
+                        <th>Status</th>
+                        <th>Joined At</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody id="queueTable"></tbody>
+            </table>
+        </div>
+    </div>
+
+    <script>
+        function showTab(tabName) {
+            document.querySelectorAll('.tab').forEach(tab => tab.classList.remove('active'));
+            document.querySelectorAll('.tab-content').forEach(content => content.classList.remove('active'));
+            event.target.classList.add('active');
+            document.getElementById(tabName).classList.add('active');
+            
+            if (tabName === 'services') loadServices();
+            if (tabName === 'staff') loadStaff();
+            if (tabName === 'customers') loadCustomers();
+            if (tabName === 'reservations') loadReservations();
+            if (tabName === 'queue') loadQueue();
+        }
+
+        function showMessage(msg, type) {
+            const messageDiv = document.getElementById('message');
+            messageDiv.innerHTML = `<div class="message ${type}">${msg}</div>`;
+            setTimeout(() => messageDiv.innerHTML = '', 5000);
+        }
+
+        // Services CRUD
+        async function loadServices() {
+            const response = await fetch('/api/services');
+            const services = await response.json();
+            
+            const html = services.map(s => `
+                <tr>
+                    <td>${s.ServiceID}</td>
+                    <td>${s.ServiceName}</td>
+                    <td>₱${s.Price.toFixed(2)}</td>
+                    <td>${s.Duration} mins</td>
+                    <td>
+                        <button class="btn btn-small btn-edit" onclick="editService(${s.ServiceID})">Edit</button>
+                        <button class="btn btn-small btn-delete" onclick="deleteService(${s.ServiceID})">Delete</button>
+                    </td>
+                </tr>
+            `).join('');
+            
+            document.getElementById('servicesTable').innerHTML = html;
+        }
+
+        async function addService() {
+            const name = document.getElementById('serviceName').value;
+            const price = parseFloat(document.getElementById('servicePrice').value);
+            const duration = parseInt(document.getElementById('serviceDuration').value);
+            
+            if (!name || !price || !duration) {
+                showMessage('Please fill all fields', 'error');
+                return;
+            }
+
+            const response = await fetch('/api/services', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ ServiceName: name, Price: price, Duration: duration })
+            });
+
+            if (response.ok) {
+                showMessage('Service added successfully', 'success');
+                document.getElementById('serviceName').value = '';
+                document.getElementById('servicePrice').value = '';
+                document.getElementById('serviceDuration').value = '';
+                loadServices();
+            } else {
+                showMessage('Error adding service', 'error');
+            }
+        }
+
+        async function editService(id) {
+            const name = prompt('Enter new service name:');
+            const price = prompt('Enter new price:');
+            const duration = prompt('Enter new duration (minutes):');
+            
+            if (name && price && duration) {
+                const response = await fetch(`/api/services/${id}`, {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ ServiceName: name, Price: parseFloat(price), Duration: parseInt(duration) })
+                });
+
+                if (response.ok) {
+                    showMessage('Service updated successfully', 'success');
+                    loadServices();
+                } else {
+                    showMessage('Error updating service', 'error');
+                }
+            }
+        }
+
+        async function deleteService(id) {
+            if (confirm('Are you sure you want to delete this service?')) {
+                const response = await fetch(`/api/services/${id}`, { method: 'DELETE' });
+                if (response.ok) {
+                    showMessage('Service deleted successfully', 'success');
+                    loadServices();
+                } else {
+                    showMessage('Error deleting service', 'error');
+                }
+            }
+        }
+
+        // Staff CRUD
+        async function loadStaff() {
+            const response = await fetch('/api/staff');
+            const staff = await response.json();
+            
+            const html = staff.map(s => `
+                <tr>
+                    <td>${s.StaffID}</td>
+                    <td>${s.Name}</td>
+                    <td>${s.Role}</td>
+                    <td><span class="status-badge status-${s.AvailabilityStatus}">${s.AvailabilityStatus}</span></td>
+                    <td>
+                        <button class="btn btn-small btn-edit" onclick="editStaff(${s.StaffID})">Edit</button>
+                        <button class="btn btn-small btn-delete" onclick="deleteStaff(${s.StaffID})">Delete</button>
+                    </td>
+                </tr>
+            `).join('');
+            
+            document.getElementById('staffTable').innerHTML = html;
+        }
+
+        async function addStaff() {
+            const name = document.getElementById('staffName').value;
+            const role = document.getElementById('staffRole').value;
+            const status = document.getElementById('staffStatus').value;
+            
+            if (!name) {
+                showMessage('Please enter staff name', 'error');
+                return;
+            }
+
+            const response = await fetch('/api/staff', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ Name: name, Role: role, AvailabilityStatus: status })
+            });
+
+            if (response.ok) {
+                showMessage('Staff added successfully', 'success');
+                document.getElementById('staffName').value = '';
+                loadStaff();
+            } else {
+                showMessage('Error adding staff', 'error');
+            }
+        }
+
+        async function editStaff(id) {
+            const name = prompt('Enter new name:');
+            const role = prompt('Enter new role (Barber/Stylist):');
+            const status = prompt('Enter new status (available/busy/off):');
+            
+            if (name && role && status) {
+                const response = await fetch(`/api/staff/${id}`, {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ Name: name, Role: role, AvailabilityStatus: status })
+                });
+
+                if (response.ok) {
+                    showMessage('Staff updated successfully', 'success');
+                    loadStaff();
+                } else {
+                    showMessage('Error updating staff', 'error');
+                }
+            }
+        }
+
+        async function deleteStaff(id) {
+            if (confirm('Are you sure you want to delete this staff member?')) {
+                const response = await fetch(`/api/staff/${id}`, { method: 'DELETE' });
+                if (response.ok) {
+                    showMessage('Staff deleted successfully', 'success');
+                    loadStaff();
+                } else {
+                    showMessage('Error deleting staff', 'error');
+                }
+            }
+        }
+
+        // Customers CRUD
+        async function loadCustomers() {
+            const response = await fetch('/api/customers');
+            const customers = await response.json();
+            
+            const html = customers.map(c => `
+                <tr>
+                    <td>${c.CustomerID}</td>
+                    <td>${c.Name}</td>
+                    <td>${c.ContactNumber}</td>
+                    <td>${c.CustomerType}</td>
+                    <td>
+                        <button class="btn btn-small btn-edit" onclick="editCustomer(${c.CustomerID})">Edit</button>
+                        <button class="btn btn-small btn-delete" onclick="deleteCustomer(${c.CustomerID})">Delete</button>
+                    </td>
+                </tr>
+            `).join('');
+            
+            document.getElementById('customersTable').innerHTML = html;
+        }
+
+        async function editCustomer(id) {
+            const name = prompt('Enter new name:');
+            const contact = prompt('Enter contact number:');
+            const type = prompt('Enter customer type (new/regular):');
+            
+            if (name && contact && type) {
+                const response = await fetch(`/api/customers/${id}`, {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ Name: name, ContactNumber: contact, CustomerType: type })
+                });
+
+                if (response.ok) {
+                    showMessage('Customer updated successfully', 'success');
+                    loadCustomers();
+                } else {
+                    showMessage('Error updating customer', 'error');
+                }
+            }
+        }
+
+        async function deleteCustomer(id) {
+            if (confirm('Are you sure you want to delete this customer?')) {
+                const response = await fetch(`/api/customers/${id}`, { method: 'DELETE' });
+                if (response.ok) {
+                    showMessage('Customer deleted successfully', 'success');
+                    loadCustomers();
+                } else {
+                    showMessage('Error deleting customer', 'error');
+                }
+            }
+        }
+
+        // Reservations CRUD
+        async function loadReservations() {
+            const response = await fetch('/api/reservations');
+            const reservations = await response.json();
+            
+            const html = reservations.map(r => `
+                <tr>
+                    <td>${r.ReservationID}</td>
+                    <td>${r.CustomerName}</td>
+                    <td>${r.ServiceName}</td>
+                    <td>${r.StaffName}</td>
+                    <td>${r.ScheduleDate}</td>
+                    <td>${r.ScheduleTime}</td>
+                    <td><span class="status-badge status-${r.Status}">${r.Status}</span></td>
+                    <td>
+                        <button class="btn btn-small btn-edit" onclick="updateReservationStatus(${r.ReservationID})">Update Status</button>
+                        <button class="btn btn-small btn-delete" onclick="deleteReservation(${r.ReservationID})">Delete</button>
+                    </td>
+                </tr>
+            `).join('');
+            
+            document.getElementById('reservationsTable').innerHTML = html;
+        }
+
+        async function updateReservationStatus(id) {
+            const status = prompt('Enter new status (scheduled/in_progress/completed/cancelled):');
+            
+            if (status) {
+                const response = await fetch(`/api/reservations/${id}`, {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ Status: status })
+                });
+
+                if (response.ok) {
+                    showMessage('Reservation status updated', 'success');
+                    loadReservations();
+                } else {
+                    showMessage('Error updating reservation', 'error');
+                }
+            }
+        }
+
+        async function deleteReservation(id) {
+            if (confirm('Are you sure you want to delete this reservation?')) {
+                const response = await fetch(`/api/reservations/${id}`, { method: 'DELETE' });
+                if (response.ok) {
+                    showMessage('Reservation deleted successfully', 'success');
+                    loadReservations();
+                } else {
+                    showMessage('Error deleting reservation', 'error');
+                }
+            }
+        }
+
+        // Queue CRUD
+        async function loadQueue() {
+            const response = await fetch('/api/queue');
+            const queue = await response.json();
+            
+            const html = queue.map(q => `
+                <tr>
+                    <td>${q.QueueID}</td>
+                    <td>${q.CustomerName}</td>
+                    <td>${q.ServiceName}</td>
+                    <td>${q.StaffName || 'Not assigned'}</td>
+                    <td><span class="status-badge status-${q.Status}">${q.Status}</span></td>
+                    <td>${q.JoinedAt}</td>
+                    <td>
+                        <button class="btn btn-small btn-edit" onclick="updateQueueStatus(${q.QueueID})">Update Status</button>
+                        <button class="btn btn-small btn-delete" onclick="deleteQueue(${q.QueueID})">Delete</button>
+                    </td>
+                </tr>
+            `).join('');
+            
+            document.getElementById('queueTable').innerHTML = html;
+        }
+
+        async function updateQueueStatus(id) {
+            const status = prompt('Enter new status (waiting/in_progress/completed/cancelled):');
+            const staffId = prompt('Enter Staff ID (optional):');
+            
+            if (status) {
+                const response = await fetch(`/api/queue/${id}`, {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ Status: status, StaffID: staffId ? parseInt(staffId) : null })
+                });
+
+                if (response.ok) {
+                    showMessage('Queue status updated', 'success');
+                    loadQueue();
+                } else {
+                    showMessage('Error updating queue', 'error');
+                }
+            }
+        }
+
+        async function deleteQueue(id) {
+            if (confirm('Are you sure you want to remove this from queue?')) {
+                const response = await fetch(`/api/queue/${id}`, { method: 'DELETE' });
+                if (response.ok) {
+                    showMessage('Queue entry removed', 'success');
+                    loadQueue();
+                } else {
+                    showMessage('Error removing from queue', 'error');
+                }
+            }
+        }
+
+        // Load services on page load
+        loadServices();
+    </script>
+</body>
+</html>
